@@ -3,11 +3,11 @@ from billy.scrape import ScrapeError, NoDataForPeriod
 from billy.scrape.votes import Vote
 from billy.scrape.bills import BillScraper, Bill
 from .utils import grouper, doc_link_url, year_from_session
+from openstates.utils import odt_to_txt
 
 import lxml.html
 import datetime
 import itertools
-import subprocess
 import os
 import re
 
@@ -191,12 +191,9 @@ class PRBillScraper(BillScraper):
 
         vote_doc, resp = self.urlretrieve(url)
 
-        # use abiword to convert document
-        html_name = vote_doc + '.html'
-        subprocess.check_call('abiword --to=%s %s' % (html_name, vote_doc),
-                              shell=True, cwd='/tmp/')
-        text = open(html_name).read()
-        os.remove(html_name)
+        vote_doc_html = odt_to_html(vote_doc)
+        text = open(vote_doc_html).read()
+        os.remove(vote_doc_html)
         os.remove(vote_doc)
 
         yes_votes = []

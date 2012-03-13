@@ -2,7 +2,6 @@ import re
 import os
 import datetime
 import json
-import subprocess
 
 import lxml.html
 
@@ -12,6 +11,8 @@ from billy.scrape import NoDataForPeriod
 
 
 import ksapi
+
+from openstates.utils import odt_to_txt
 
 class KSBillScraper(BillScraper):
     state = 'ks'
@@ -145,11 +146,9 @@ class KSBillScraper(BillScraper):
         vote_date = datetime.datetime.strptime(vote_date, '%a %d %b %Y')
 
         vote_doc, resp = self.urlretrieve(vote_url)
-
-        subprocess.check_call('abiword --to=ksvote.txt %s' % vote_doc,
-                              shell=True, cwd='/tmp/')
-        vote_lines = open('/tmp/ksvote.txt').readlines()
-
+        vote_doc_txt = odt_to_txt(vote_doc)
+        vote_lines = open(vote_doc_txt).readlines()
+        os.remove(vote_doc_txt)
         os.remove(vote_doc)
 
         vote = None
